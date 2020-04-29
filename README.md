@@ -16,6 +16,7 @@ curl http://localhost:8080/\?url\=https://www.example.com
 ## Prerender plugins
 
 Some plugins have been activated by default:
+
 - https://github.com/prerender/prerender/blob/master/lib/plugins/whitelist.js
 - https://github.com/prerender/prerender/blob/master/lib/plugins/blacklist.js
 - https://github.com/prerender/prerender/blob/master/lib/plugins/httpHeaders.js

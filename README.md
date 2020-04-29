@@ -6,7 +6,7 @@ Container service that uses Headless Chrome to render SPA's as HTML, built on Al
 ## Usage
 
 ```bash
-docker run -p 3000:3000 npulidom/prerender
+docker run -p 8080:80 npulidom/prerender
 ```
 
 ## Prerender plugins

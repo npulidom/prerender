@@ -21,8 +21,8 @@ RUN npm install -g pm2 && \
 # copy app
 COPY . .
 
-# prerender port
-EXPOSE 3000
+# service port
+EXPOSE 80
 
 # start
 CMD pm2-runtime init.js

@@ -1,5 +1,5 @@
 # OS
-FROM node:lts-alpine
+FROM node:12-alpine
 
 # env vars
 ENV CHROME_BIN=/usr/bin/chromium-browser

@@ -1,6 +1,4 @@
 {
-	"name": "prerender",
-	"license": "unlicense",
 	"scripts": {
 		"server": "pm2 stop init && pm2 start init.js --watch && pm2 logs"
 	},

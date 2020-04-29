@@ -1,7 +1,7 @@
 Prerender
 =========
 
-Lightweight Prerender container built on Alpine Linux with Node and Headless Chrome.
+Node server that uses Headless Chrome to render a javascript-rendered page as HTML, built on Alpine Linux.
 
 ## Usage
 ```bash

@@ -11,9 +11,12 @@ const server = prerender({
 	forwardHeaders: true
 })
 
-//server.use(prerender.blacklist())
-server.use(prerender.whitelist())
+if (process.env.ALLOWED_DOMAINS)
+	server.use(prerender.whitelist())
+
+if (process.env.BLACKLISTED_DOMAINS)
+	server.use(prerender.blacklist())
+
 server.use(prerender.httpHeaders())
 server.use(prerender.removeScriptTags())
-
 server.start()

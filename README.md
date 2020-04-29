@@ -4,6 +4,7 @@ Prerender
 Container service that uses Headless Chrome to render a javascript-rendered page as HTML, built on Alpine Linux.
 
 ## Usage
+
 ```bash
 docker run -p 3000:3000 npulidom/prerender
 ```

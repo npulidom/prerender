@@ -56,7 +56,7 @@ async function init() {
 
 		try {
 
-			const stream = got.stream(`http://localhost:3000/render?url=${req.query.url.trim()}`)
+			const stream = got.stream(`http://localhost:3000/render?url=${req.query.url.trim()}&userAgent=PrerenderCrawler`)
 
 			stream.on('data', data => res.write(data))
 			stream.on('end', data => res.status(200).send())

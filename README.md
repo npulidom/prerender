@@ -1,7 +1,7 @@
 Prerender
 =========
 
-Container service that uses Headless Chrome to render SPA's as HTML, built on Alpine Linux.
+Container service that uses Headless Chrome to render SPA's as HTML ([Dynamic Rendering](https://developers.google.com/search/docs/guides/dynamic-rendering)), built on Alpine Linux.
 
 ## Usage
 

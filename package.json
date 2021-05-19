@@ -1,10 +1,12 @@
 {
+	"name": "node-prerender",
+	"license": "UNLICENSED",
 	"scripts": {
-		"server": "pm2 stop init && pm2 start init.js --watch && pm2 logs"
+		"server": "pm2 stop init && pm2 delete init && pm2 start init.js --watch --ignore-watch='.git/*' && pm2 logs"
 	},
 	"dependencies": {
 		"express": "~4.17.1",
-		"got": "~11.0.2",
-		"prerender": "~5.6.0"
+		"got": "~11.8.2",
+		"prerender": "~5.10.0"
 	}
 }

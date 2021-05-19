@@ -1,5 +1,5 @@
 # OS
-FROM node:12-alpine
+FROM node:14-alpine
 
 # env vars
 ENV CHROME_BIN=/usr/bin/chromium-browser
@@ -24,5 +24,5 @@ COPY . .
 # service port
 EXPOSE 80
 
-# start
-CMD pm2-runtime init.js
+# entrypoint
+ENTRYPOINT ["/home/start.sh"]

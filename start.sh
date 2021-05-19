@@ -3,7 +3,7 @@
 
 echo -e "Running container...";
 
-# run with pm2 in dev environment
+# run with pm2 in dev mode
 if [ "$APP_ENV" = "local" ]; then
 	pm2-runtime init.js
 # run without a process manager

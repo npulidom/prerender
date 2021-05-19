@@ -12,9 +12,10 @@ curl -i http://localhost:8080/?url=https://www.example.com
 
 ```
 
-## PM env-vars
+## Env vars
 ```yml
 APP_ENV: Application environment (use 'local' for dev mode)
+ALLOWED_DOMAINS: Allowed hosts (i.e. www.example.com)
 ```
 
 ## Prerender plugins

@@ -8,6 +8,7 @@ const prerender = require('prerender')
 
 const app = express()
 
+//++ Prerender setup
 const server = prerender({
 
 	chromeFlags   : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],

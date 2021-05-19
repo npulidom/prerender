@@ -5,4 +5,5 @@ services:
     ports:
       - "80:80"
     environment:
-      - ALLOWED_DOMAINS=yahoo.com,www.google.com
+      - APP_ENV=production
+      - ALLOWED_DOMAINS=www.example.com

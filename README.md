@@ -16,6 +16,9 @@ curl -i http://localhost:8080/?url=https://www.example.com
 ```yml
 APP_ENV: Application environment (use 'local' for dev mode)
 ALLOWED_DOMAINS: Allowed hosts (i.e. www.example.com)
+CACHE_MAXSIZE: Maximum number of items in the cache, default 100
+CACHE_TTL: Time to live for items in the cache, default 60 seconds
+AUTOEXIT: Auto exit process if an exception raises, defaults false
 ```
 
 ## Prerender plugins

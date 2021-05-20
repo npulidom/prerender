@@ -13,17 +13,20 @@ const server = prerender({
 
 	chromeFlags   : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
 	chromeLocation: '/usr/bin/chromium-browser',
-	forwardHeaders: true
+	forwardHeaders: true,
+	pageLoadTimeout: 35*1000 // 35 secs
 })
+
+//++ plugins
 
 if (process.env.ALLOWED_DOMAINS)
 	server.use(prerender.whitelist())
 
-if (process.env.BLACKLISTED_DOMAINS)
-	server.use(prerender.blacklist())
-
 server.use(prerender.httpHeaders())
 server.use(prerender.removeScriptTags())
+
+// prerender cache
+server.use(require('prerender-memory-cache'))
 
 /**
  * Init
@@ -53,23 +56,41 @@ async function init() {
 	 */
 	app.get("/", (req, res) => {
 
-		if (!req.query.url) return res.send("Error: missing 'url' query parameter.")
-
 		try {
+
+			if (!req.query.url) throw "Missing 'url' query param"
 
 			const stream = got.stream(`http://localhost:3000/render?url=${req.query.url.trim()}&userAgent=PrerenderCrawler`)
 
 			stream.on('data', data => res.write(data))
-			stream.on('end', data => res.status(200).send())
-			stream.on('error', e => res.status(200).send(e.toString()))
+			stream.on('end', () => res.status(200).send())
+			stream.on('error', e => console.warn(`stream error '${e.toString()}'`))
 		}
-		catch (e) { console.error("Init -> stream exception", e); res.sendStatus(500) }
+		catch (e) {
+
+			console.error("Init -> exception", e)
+
+			// exit process
+			if (process.env.AUTOEXIT) setTimeout(() => exit(), 1000)
+
+			res.status(400).send(e.toString())
+		}
 	})
 
 	/**
 	 * GET - Not Found
 	 */
 	app.get('*', (req, res) => res.sendStatus(404))
+}
+
+/**
+ * Exit Process
+ */
+function exit() {
+
+	console.warn("Init -> ending process...")
+	// exit process
+	process.exit(0)
 }
 
 init()

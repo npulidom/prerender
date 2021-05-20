@@ -5,6 +5,7 @@
 const express   = require('express')
 const got       = require('got')
 const prerender = require('prerender')
+const { URL }   = require('url')
 
 const app = express()
 
@@ -60,7 +61,11 @@ async function init() {
 
 			if (!req.query.url) throw "Missing 'url' query param"
 
-			const stream = got.stream(`http://localhost:3000/render?url=${req.query.url.trim()}&userAgent=PrerenderCrawler`)
+			const { href } = new URL(req.query.url.trim())
+
+			if (!href) throw "invalid 'url' query param"
+
+			const stream = got.stream(`http://localhost:3000/render?url=${href}&userAgent=PrerenderCrawler`)
 
 			stream.on('data', data => res.write(data))
 			stream.on('end', () => res.status(200).send())

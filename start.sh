@@ -1,7 +1,7 @@
 #!/bin/sh
 # docker-entrypoint
 
-echo -e "Running container...";
+echo -e "Running container..."
 
 # run with pm2 in dev mode
 if [ "$APP_ENV" = "local" ]; then

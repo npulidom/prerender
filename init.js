@@ -55,7 +55,7 @@ async function init() {
 	/**
 	 * GET - Root
 	 */
-	app.get("/", (req, res) => {
+	app.get('*/', (req, res) => {
 
 		try {
 
@@ -83,9 +83,9 @@ async function init() {
 	})
 
 	/**
-	 * GET - Not Found
+	 * Not Found
 	 */
-	app.get('*', (req, res) => res.sendStatus(404))
+	app.use((req, res, next) => res.sendStatus(404))
 }
 
 /**

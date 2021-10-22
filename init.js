@@ -65,7 +65,7 @@ async function init() {
 
 			if (!href) throw "invalid 'url' query param"
 
-			const stream = got.stream(`http://localhost:3000/render?url=${href}&userAgent=PrerenderCrawler`)
+			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
 
 			stream.on('data', data => res.write(data))
 			stream.on('end', () => res.status(200).send())

@@ -12,10 +12,10 @@ const app = express()
 //++ Prerender setup
 const server = prerender({
 
-	chromeFlags   : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
-	chromeLocation: '/usr/bin/chromium-browser',
-	forwardHeaders: true,
-	pageLoadTimeout: 35*1000 // 35 secs
+	chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
+	chromeLocation : '/usr/bin/chromium-browser',
+	forwardHeaders : true,
+	pageLoadTimeout: 35 * 1000 // 35 secs
 })
 
 //++ plugins
@@ -43,9 +43,9 @@ async function init() {
 		// express
 		await app.listen(80)
 
-		console.log("Init -> servers ready")
+		console.log('Init -> servers ready')
 	}
-	catch (e) { return console.error("Init -> server exception", e) }
+	catch (e) { return console.error('Init -> server exception', e) }
 
 	/**
 	 * GET - Health check
@@ -59,11 +59,11 @@ async function init() {
 
 		try {
 
-			if (!req.query.url) throw "Missing 'url' query param"
+			if (!req.query.url) throw 'Missing "url" query param'
 
 			const { href } = new URL(req.query.url.trim())
 
-			if (!href) throw "invalid 'url' query param"
+			if (!href) throw 'invalid "url" query param'
 
 			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
 
@@ -73,7 +73,7 @@ async function init() {
 		}
 		catch (e) {
 
-			console.error("Init -> exception", e)
+			console.error('Init -> exception', e)
 
 			// exit process
 			if (process.env.AUTOEXIT) setTimeout(() => exit(), 1000)
@@ -93,7 +93,7 @@ async function init() {
  */
 function exit() {
 
-	console.warn("Init -> ending process...")
+	console.warn('Init -> ending process...')
 	// exit process
 	process.exit(0)
 }

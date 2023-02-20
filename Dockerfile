@@ -1,9 +1,12 @@
 # OS
-FROM node:14-alpine
+FROM node:18-alpine
 
 # env vars
 ENV CHROME_BIN=/usr/bin/chromium-browser
 ENV CHROME_PATH=/usr/lib/chromium/
+
+# allow "node" user to open port 80
+RUN apk add libcap && setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
 
 # chromium install
 RUN apk update && apk add \
@@ -11,18 +14,49 @@ RUN apk update && apk add \
 	&& rm -rf /var/cache/apk/*
 
 # home directory
-WORKDIR /home
+WORKDIR /home/node/app
 
-# node packages
+# copy node packages
 COPY package.json .
-RUN npm install -g pm2 && \
-	npm install --production --no-package-lock
+
+# package lock file
+RUN npm i --package-lock-only
+
+# build id argument
+ARG BUILD_ID
+ENV BUILD_ID=$BUILD_ID
+
+# ! development stage
+FROM base AS dev
+
+ENV NODE_ENV=development
+
+# install nodemon & deps
+RUN npm i -g nodemon && \
+	npm ci --omit=dev && npm cache clean --force
 
 # copy app
 COPY . .
 
-# service port
-EXPOSE 80
+# switch user
+USER node
 
-# entrypoint
-ENTRYPOINT ["/home/start.sh"]
+# cmd
+CMD ["nodemon", "init.js"]
+
+# ! production stage
+FROM base AS prod
+
+ENV NODE_ENV=production
+
+# install deps
+RUN npm ci --omit=dev && npm cache clean --force
+
+# copy app
+COPY . .
+
+# switch user
+USER node
+
+# cmd
+CMD ["node", "init.js"]

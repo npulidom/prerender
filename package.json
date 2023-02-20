@@ -2,12 +2,12 @@
 	"name": "node-prerender",
 	"license": "UNLICENSED",
 	"scripts": {
-		"server": "pm2 stop init && pm2 delete init && pm2 start init.js --watch --ignore-watch='.git/*' && pm2 logs"
+		"watch": "docker logs -ft npm_prerender"
 	},
 	"dependencies": {
 		"express": "~4.18.2",
-		"got": "~11.8.2",
-		"prerender": "~5.13.1",
+		"got": "~12.5.3",
+		"prerender": "~5.20.1",
 		"prerender-memory-cache": "~1.0.2"
 	}
 }

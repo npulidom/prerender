@@ -1,9 +1,0 @@
-version: '2'
-services:
-  prerender-production:
-    image: npulidom/prerender
-    ports:
-      - "80:80"
-    environment:
-      - APP_ENV=production
-      - ALLOWED_DOMAINS=www.example.com

@@ -1,4 +1,4 @@
-# OS
+# ! base stage
 FROM node:18-alpine
 
 # env vars

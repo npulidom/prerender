@@ -1,17 +1,15 @@
-.PHONY: docker-build docker-build-prod docker-push-prod deploy-prod
+.PHONY: deploy docker-build-dev
 
-docker-build:
-	docker build -t npulidom/prerender --target=dev .
+# Build ID
+BUILD_ID=$(shell git log -1 --pretty=%h)
+
+docker-build-dev:
+	docker build -t npulidom/prerender:dev --build-arg BUILD_ID="$(BUILD_ID)" --target=dev .
 
 docker-build-prod:
-	docker build -t npulidom/prerender:prod --target=prod .
+	docker build -t npulidom/prerender --build-arg BUILD_ID="$(BUILD_ID)" --target=prod .
 
 docker-push:
 	docker push npulidom/prerender
 
-docker-push-prod:
-	docker push npulidom/prerender:prod
-
-deploy: docker-build docker-push
-
-deploy-prod: docker-build-prod docker-push-prod
+deploy: docker-build-prod docker-push

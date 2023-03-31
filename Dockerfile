@@ -26,6 +26,23 @@ RUN npm i --package-lock-only
 ARG BUILD_ID
 ENV BUILD_ID=$BUILD_ID
 
+# ! production stage
+FROM base AS prod
+
+ENV NODE_ENV=production
+
+# install deps
+RUN npm ci --omit=dev && npm cache clean --force
+
+# copy app
+COPY . .
+
+# switch user
+USER node
+
+# cmd
+CMD ["node", "init.js"]
+
 # ! development stage
 FROM base AS dev
 
@@ -43,20 +60,3 @@ USER node
 
 # cmd
 CMD ["nodemon", "init.js"]
-
-# ! production stage
-FROM base AS prod
-
-ENV NODE_ENV=production
-
-# install deps
-RUN npm ci --omit=dev && npm cache clean --force
-
-# copy app
-COPY . .
-
-# switch user
-USER node
-
-# cmd
-CMD ["node", "init.js"]

@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  # prerender
+  prerender:
+    image: npulidom/prerender:dev
+    container_name: g-prerender
+    volumes:
+      - /home/node/app/node_modules
+      - ./:/home/node/app/
+    tty: true
+    environment:
+      - CACHE_MAXSIZE=200
+    ports:
+      - "8080:80"

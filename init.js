@@ -2,53 +2,49 @@
  * Init
  */
 
-const express   = require('express')
-const got       = require('got')
-const prerender = require('prerender')
-const { URL }   = require('url')
+import express        from 'express'
+import prerender      from 'prerender'
+import prerenderCache from 'prerender-memory-cache'
+import got            from 'got'
+import { URL }        from 'url'
 
+/**
+ * Service Version
+ */
+const version = process.env.BUILD_ID
+
+/**
+ * Service Server (express)
+ */
 const app = express()
+let httpServer
 
-//++ Prerender setup
-const server = prerender({
+/**
+ * Prerender Server (express)
+ */
+const prerenderServer = prerender({
 
 	chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
-	chromeLocation : '/usr/bin/chromium-browser',
+	chromeLocation : '/usr/bin/chromium',
 	forwardHeaders : true,
-	pageLoadTimeout: 35 * 1000 // 35 secs
+	pageLoadTimeout: 45 * 1000 // 45 secs
 })
 
-//++ plugins
+// prerender plugins
+if (process.env.ALLOWED_DOMAINS) prerenderServer.use(prerender.whitelist())
 
-if (process.env.ALLOWED_DOMAINS)
-	server.use(prerender.whitelist())
-
-server.use(prerender.httpHeaders())
-server.use(prerender.removeScriptTags())
-
+prerenderServer.use(prerender.httpHeaders())
+prerenderServer.use(prerender.removeScriptTags())
 // prerender cache
-server.use(require('prerender-memory-cache'))
+prerenderServer.use(prerenderCache)
 
 /**
  * Init
  */
 async function init() {
 
-	// ++ Servers
-	try {
-
-		// prerender
-		await server.start()
-
-		// express
-		await app.listen(80)
-
-		console.log('Init -> servers ready')
-	}
-	catch (e) { return console.error('Init -> server exception', e) }
-
 	/**
-	 * GET - Health check
+	 * Health Check
 	 */
 	app.get('*/health', (req, res) => res.sendStatus(200))
 
@@ -59,43 +55,53 @@ async function init() {
 
 		try {
 
-			if (!req.query.url) throw 'Missing "url" query param'
+			if (!req.query.url) throw 'missing \'url\' query param'
 
 			const { href } = new URL(req.query.url.trim())
 
-			if (!href) throw 'invalid "url" query param'
+			if (!href) throw 'invalid \'url\' query param'
 
 			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
 
 			stream.on('data', data => res.write(data))
 			stream.on('end', () => res.status(200).send())
-			stream.on('error', e => console.warn(`stream error '${e.toString()}'`))
+			stream.on('error', e => console.warn(`Init (prerender) -> stream error:`, e))
 		}
 		catch (e) {
 
-			console.error('Init -> exception', e)
+			console.error(`Init (prerender) -> exception:`, e)
 
 			// exit process
-			if (process.env.AUTOEXIT) setTimeout(() => exit(), 1000)
+			if (parseInt(process.env.AUTOEXIT)) setTimeout(async () => await exitGracefully(), 1500)
 
-			res.status(400).send(e.toString())
+			res.status(500).send(e.toString())
 		}
 	})
 
-	/**
-	 * Not Found
-	 */
-	app.use((req, res, next) => res.sendStatus(404))
+	// start server
+	httpServer = await app.listen(80)
+
+	// prerender
+	await prerenderServer.start()
+
+	console.log(`Init -> servers up! ${new Date().toString()}, version: ${version}`)
 }
 
 /**
- * Exit Process
+ * Gracefull exit
  */
-function exit() {
+async function exitGracefully(signal) {
 
-	console.warn('Init -> ending process...')
-	// exit process
+	if (httpServer) await httpServer.close()
+
+	console.log(`Init (exitGracefully) -> ${signal} signal event`)
 	process.exit(0)
 }
 
-init()
+// process signal events
+process.on('SIGINT', exitGracefully)
+process.on('SIGTERM', exitGracefully)
+
+// start app
+try       { await init() }
+catch (e) { console.error('Init -> main exception:', e) }

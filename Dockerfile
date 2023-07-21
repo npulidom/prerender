@@ -1,17 +1,16 @@
-# ! base stage
-FROM node:18-alpine
+# ! base stage (LTS stable)
+FROM node:lts-bullseye-slim AS base
 
-# env vars
-ENV CHROME_BIN=/usr/bin/chromium-browser
-ENV CHROME_PATH=/usr/lib/chromium/
-
-# allow "node" user to open port 80
-RUN apk add libcap && setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
+# libcap & open port 80 as user node
+RUN apt-get update && \
+	apt-get install -y libcap2-bin && \
+	apt-get clean && \
+	setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
 
 # chromium install
-RUN apk update && apk add \
-	chromium \
-	&& rm -rf /var/cache/apk/*
+RUN apt-get update && \
+	apt-get install -y chromium && \
+	apt-get clean
 
 # home directory
 WORKDIR /home/node/app
@@ -22,6 +21,8 @@ COPY package.json .
 # package lock file
 RUN npm i --package-lock-only
 
+# term env-var
+ENV TERM=xterm
 # build id argument
 ARG BUILD_ID
 ENV BUILD_ID=$BUILD_ID

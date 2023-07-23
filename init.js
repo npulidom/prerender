@@ -17,6 +17,9 @@ const version = process.env.BUILD_ID
  * Service Server (express)
  */
 const app = express()
+// trust proxy
+app.set('trust proxy', 1)
+
 let httpServer
 
 /**

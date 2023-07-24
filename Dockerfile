@@ -1,16 +1,13 @@
-# ! base stage (LTS stable)
-FROM node:lts-bookworm-slim AS base
+# ! base stage
+FROM node:18-alpine AS base
 
-# libcap & open port 80 as user node
-RUN apt-get update && \
-	apt-get install -y libcap2-bin && \
-	apt-get clean && \
-	setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
+# allow "node" user to open port 80
+RUN apk add libcap && setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
 
 # chromium install
-RUN apt-get update && \
-	apt-get install -y chromium && \
-	apt-get clean
+RUN apk update && apk add \
+	chromium \
+	&& rm -rf /var/cache/apk/*
 
 # home directory
 WORKDIR /home/node/app
@@ -21,8 +18,6 @@ COPY package.json .
 # package lock file
 RUN npm i --package-lock-only
 
-# term env-var
-ENV TERM=xterm
 # build id argument
 ARG BUILD_ID
 ENV BUILD_ID=$BUILD_ID

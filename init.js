@@ -28,7 +28,7 @@ let httpServer
 const prerenderServer = prerender({
 
 	chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
-	chromeLocation : '/usr/bin/chromium',
+	chromeLocation : '/usr/bin/chromium-browser',
 	forwardHeaders : true,
 	pageLoadTimeout: 45 * 1000 // 45 secs
 })

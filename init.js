@@ -81,11 +81,7 @@ async function init() {
 		}
 		catch (e) {
 
-			console.error(`Init (prerender) -> exception:`, e)
-
-			// exit process
-			if (parseInt(process.env.AUTOEXIT)) setTimeout(async () => await exitGracefully(), 1500)
-
+			console.error(`Init (prerender) -> exception: ${e.toString()}`)
 			res.status(500).send(e.toString())
 		}
 	})

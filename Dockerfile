@@ -1,5 +1,5 @@
 # ! base stage (LTS stable)
-FROM node:lts-bullseye-slim AS base
+FROM node:lts-bookworm-slim AS base
 
 # libcap & open port 80 as user node
 RUN apt-get update && \
@@ -10,7 +10,7 @@ RUN apt-get update && \
 # chromium install
 RUN apt-get update && \
 	apt-get install -y chromium && \
-	apt-get clean
+	apt-get clean && apt-get autoremove
 
 # home directory
 WORKDIR /home/node/app

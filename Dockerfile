@@ -10,7 +10,7 @@ RUN apt-get update && \
 # chromium install
 RUN apt-get update && \
 	apt-get install -y chromium && \
-	apt-get clean && apt-get autoremove
+	apt-get clean
 
 # home directory
 WORKDIR /home/node/app

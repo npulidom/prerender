@@ -45,6 +45,7 @@ prerenderServer.use(prerenderCache)
 
 /**
  * Init
+ * @returns {undefined}
  */
 async function init() {
 
@@ -100,6 +101,8 @@ async function init() {
 
 /**
  * Gracefull exit
+ * @param {string} signal - The signal
+ * @returns {undefined}
  */
 async function exitGracefully(signal) {
 

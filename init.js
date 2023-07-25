@@ -67,7 +67,7 @@ async function init() {
 			if (!href) throw 'invalid \'url\' query param'
 
 			// trace execution time
-			console.time(`prerender_${href}`)
+			console.time(`prerender:${href}`)
 
 			// get HTML
 			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
@@ -76,7 +76,11 @@ async function init() {
 
 			stream.on('data', data => res.write(data))
 
-			stream.on('end', () => res.status(200).send(), console.timeEnd(`prerender_${href}`))
+			stream.on('end', () => {
+
+				console.timeEnd(`prerender:${href}`)
+				res.status(200).send()
+			})
 		}
 		catch (e) {
 

@@ -19,6 +19,8 @@ const version = process.env.BUILD_ID
 const app = express()
 // trust proxy
 app.set('trust proxy', 1)
+// disable X-Powered-By
+app.disable('x-powered-by')
 
 let httpServer
 

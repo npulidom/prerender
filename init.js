@@ -73,7 +73,7 @@ async function init() {
 			// get HTML
 			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
 
-			stream.on('error', e => console.warn(`Init (prerender) -> stream error:`, e))
+			stream.on('error', e => console.warn(`Init (prerender) -> stream error: ${e.toString()}`))
 
 			stream.on('data', data => res.write(data))
 

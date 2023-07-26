@@ -19,7 +19,7 @@ const version = process.env.BUILD_ID
 const app = express()
 // trust proxy
 app.set('trust proxy', 1)
-// disable X-Powered-By
+// disable X-Powered-By response header
 app.disable('x-powered-by')
 
 let httpServer
@@ -45,6 +45,7 @@ prerenderServer.use(prerenderCache)
 
 /**
  * Init
+ * @returns {undefined}
  */
 async function init() {
 
@@ -72,7 +73,7 @@ async function init() {
 			// get HTML
 			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
 
-			stream.on('error', e => console.warn(`Init (prerender) -> stream error:`, e))
+			stream.on('error', e => console.warn(`Init (prerender) -> stream error: ${e.toString()}`))
 
 			stream.on('data', data => res.write(data))
 
@@ -100,6 +101,8 @@ async function init() {
 
 /**
  * Gracefull exit
+ * @param {string} signal - The signal
+ * @returns {undefined}
  */
 async function exitGracefully(signal) {
 

@@ -8,46 +8,41 @@ import prerenderCache from 'prerender-memory-cache'
 import got            from 'got'
 import { URL }        from 'url'
 
-/**
- * Service Version
- */
-const version = process.env.BUILD_ID
+// ++ consts
+const VERSION = process.env.BUILD_ID
 
-/**
- * Service Server (express)
- */
-const app = express()
-// trust proxy
-app.set('trust proxy', 1)
-// disable X-Powered-By response header
-app.disable('x-powered-by')
-
+// ++ props
 let httpServer
-
-/**
- * Prerender Server (express)
- */
-const prerenderServer = prerender({
-
-	chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
-	chromeLocation : '/usr/bin/chromium-browser',
-	forwardHeaders : true,
-	pageLoadTimeout: 45 * 1000 // 45 secs
-})
-
-// prerender plugins
-if (process.env.ALLOWED_DOMAINS) prerenderServer.use(prerender.whitelist())
-
-prerenderServer.use(prerender.httpHeaders())
-prerenderServer.use(prerender.removeScriptTags())
-// prerender cache
-prerenderServer.use(prerenderCache)
 
 /**
  * Init
  * @returns {undefined}
  */
 async function init() {
+
+	// ++ prerender server (express)
+	const prerenderServer = prerender({
+
+		chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
+		chromeLocation : '/usr/bin/chromium-browser',
+		forwardHeaders : true,
+		pageLoadTimeout: 45 * 1000 // 45 secs
+	})
+
+	// prerender plugins
+	if (process.env.ALLOWED_DOMAINS) prerenderServer.use(prerender.whitelist())
+
+	prerenderServer.use(prerender.httpHeaders())
+	prerenderServer.use(prerender.removeScriptTags())
+	// prerender cache
+	prerenderServer.use(prerenderCache)
+
+	// ++ express setup
+	const app = express()
+	// trust proxy
+	app.set('trust proxy', 1)
+	// disable X-Powered-By response header
+	app.disable('x-powered-by')
 
 	/**
 	 * Health Check
@@ -90,13 +85,13 @@ async function init() {
 		}
 	})
 
-	// start server
+	// ++ start express server
 	httpServer = await app.listen(80)
 
-	// prerender
+	// ++ start prerender server
 	await prerenderServer.start()
 
-	console.log(`Init -> servers up! ${new Date().toString()}, version: ${version}`)
+	console.log(`Init -> servers up at ${new Date().toString()}, version: ${VERSION}`)
 }
 
 /**

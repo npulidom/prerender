@@ -1,5 +1,4 @@
-Prerender
-=========
+# Prerender
 
 Container service that uses Headless Chrome to render SPA's as HTML ([Dynamic Rendering](https://developers.google.com/search/docs/guides/dynamic-rendering)), built on NodeJs.
 
@@ -13,6 +12,7 @@ curl -i http://localhost:8080/?url=https://www.example.com
 ```
 
 ## Env vars
+
 ```yml
 ALLOWED_DOMAINS: Allowed hosts (i.e. www.example.com)
 CACHE_MAXSIZE: Maximum number of items in the cache, default is 100

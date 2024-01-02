@@ -11,7 +11,7 @@ curl -i http://localhost:8080/?url=https://www.example.com
 
 ```
 
-## Env vars
+## Env-vars
 
 ```yml
 ALLOWED_DOMAINS: Allowed hosts (i.e. www.example.com)

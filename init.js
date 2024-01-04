@@ -112,5 +112,5 @@ process.on('SIGINT', exitGracefully)
 process.on('SIGTERM', exitGracefully)
 
 // start app
-try       { await init() }
+try { await init() }
 catch (e) { console.error('Init -> main exception:', e) }

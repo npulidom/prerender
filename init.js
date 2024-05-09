@@ -6,7 +6,6 @@ import express        from 'express'
 import prerender      from 'prerender'
 import prerenderCache from 'prerender-memory-cache'
 import got            from 'got'
-import { URL }        from 'url'
 
 // ++ consts
 const VERSION = process.env.BUILD_ID

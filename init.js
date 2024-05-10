@@ -7,10 +7,10 @@ import prerender      from 'prerender'
 import prerenderCache from 'prerender-memory-cache'
 import got            from 'got'
 
-// ++ consts
+// * consts
 const VERSION = process.env.BUILD_ID
 
-// ++ props
+// * props
 let httpServer
 
 /**
@@ -19,13 +19,13 @@ let httpServer
  */
 async function init() {
 
-	// ++ prerender server (express)
+	// * prerender server (express)
 	const prerenderServer = prerender({
 
 		chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
 		chromeLocation : '/usr/bin/chromium',
 		forwardHeaders : true,
-		pageLoadTimeout: 45 * 1000 // 45 secs
+		pageLoadTimeout: 35 * 1000 // 35 secs
 	})
 
 	// prerender plugins
@@ -36,7 +36,7 @@ async function init() {
 	// prerender cache
 	prerenderServer.use(prerenderCache)
 
-	// ++ express setup
+	// * express setup
 	const app = express()
 	// trust proxy
 	app.set('trust proxy', 1)
@@ -55,25 +55,46 @@ async function init() {
 
 		try {
 
-			if (!req.query.url) throw 'missing \'url\' query param'
+			if (!req.query.url) throw 'missing "url" query param'
 
-			const { href } = new URL(req.query.url.trim())
+			const { href, pathname } = new URL(req.query.url.trim())
+			if (!href) throw 'invalid "url" query param'
 
-			if (!href) throw 'invalid \'url\' query param'
+			// check URL path for any extension (only HTML files supported)
+			const extension = pathname.match(/.*\.[^.]+$/)
+			if (extension?.length && !/\.html$/.test(pathname)) throw 'URL_NOT_SUPPORTED'
 
 			// trace execution time
-			console.time(`prerender:${href}`)
+			if (process.env.NODE_ENV === 'development') console.time(`prerender:${href}`)
 
-			// get HTML
+			// get output
 			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
 
-			stream.on('error', e => console.warn(`Init (prerender) -> stream error: ${e.toString()}`))
+			// on-error
+			stream.on('error', async e => {
 
+				console.warn(`Init (prerender/on-error) -> stream error: ${e.toString()}`)
+
+				// restart browser? check browser health
+				const { statusCode } = await got('http://localhost:3000/render?url=https://www.google.com')
+
+				if (statusCode === 200)
+					console.log(`Init (prerender/on-error) -> browser is healthy, no need to restart`)
+				else
+					prerenderServer.restartBrowser()
+
+				res.status(400).send()
+			})
+
+			// on-data
 			stream.on('data', data => res.write(data))
 
+			// on-end
 			stream.on('end', () => {
 
-				console.timeEnd(`prerender:${href}`)
+				// trace execution time
+				if (process.env.NODE_ENV === 'development') console.timeEnd(`prerender:${href}`)
+
 				res.status(200).send()
 			})
 		}
@@ -84,10 +105,10 @@ async function init() {
 		}
 	})
 
-	// ++ start express server
+	// * start express server
 	httpServer = await app.listen(80)
 
-	// ++ start prerender server
+	// * start prerender server
 	await prerenderServer.start()
 
 	console.log(`Init -> servers up at ${new Date().toString()}, version: ${VERSION}`)

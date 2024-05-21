@@ -8,9 +8,9 @@
 		"watch": "docker logs -ft g-prerender"
 	},
 	"dependencies": {
-		"express": "~4.18.2",
-		"got": "~13.0.0",
-		"prerender": "~5.20.2",
+		"express": "~4.19.2",
+		"got": "~14.2.1",
+		"prerender": "~5.21.1",
 		"prerender-memory-cache": "~1.0.2"
 	}
 }

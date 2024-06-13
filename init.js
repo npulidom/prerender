@@ -2,13 +2,15 @@
  * Init
  */
 
+import axios          from 'axios'
 import express        from 'express'
 import prerender      from 'prerender'
 import prerenderCache from 'prerender-memory-cache'
-import got            from 'got'
 
 // * consts
 const VERSION = process.env.BUILD_ID
+
+const HEALTH_CHECK_URL = 'https://www.example.com/'
 
 // * props
 let httpServer
@@ -51,14 +53,14 @@ async function init() {
 	/**
 	 * GET - Root
 	 */
-	app.get('*/', (req, res) => {
+	app.get('*/', async (req, res) => {
 
 		try {
 
-			if (!req.query.url) throw 'missing "url" query param'
+			if (!req.query.url) throw 'missing “url” query param'
 
 			const { href, pathname } = new URL(req.query.url.trim())
-			if (!href) throw 'invalid "url" query param'
+			if (!href) throw 'invalid “url” query param'
 
 			// check URL path for any extension (only HTML files supported)
 			const extension = pathname.match(/.*\.[^.]+$/)
@@ -68,27 +70,35 @@ async function init() {
 			if (process.env.NODE_ENV === 'development') console.time(`prerender:${href}`)
 
 			// get output
-			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
+			const { data: stream } = await axios({
+
+				url         : `http://localhost:3000/render?userAgent=PrerenderCrawler&followRedirects=true&url=${href}`,
+				method      : 'GET',
+				responseType: 'stream',
+			})
 
 			// on-error
 			stream.on('error', async e => {
 
 				console.warn(`Init (prerender/on-error) -> stream error: ${e.toString()}`)
 
-				// restart browser? check browser health
-				const { statusCode } = await got('http://localhost:3000/render?url=https://www.google.com')
+				try {
 
-				if (statusCode === 200)
-					console.log(`Init (prerender/on-error) -> browser is healthy, no need to restart`)
-				else
+					// check browser health, restart browser?
+					const { status } = await axios(`http://localhost:3000/render?url=${HEALTH_CHECK_URL}`)
+					console.log(`Init (prerender/on-error) -> browser is healthy, no need to restart [${status}]`)
+				}
+				catch (e) {
+
+					console.log(`Init (prerender/on-error) -> browser is not healthy, restarting browser ...`)
 					prerenderServer.restartBrowser()
+				}
 
-				res.status(400).send()
+				res.status(429).send()
 			})
 
 			// on-data
 			stream.on('data', data => res.write(data))
-
 			// on-end
 			stream.on('end', () => {
 

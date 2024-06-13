@@ -14,7 +14,7 @@ curl -i http://localhost:8080/?url=https://www.example.com
 ## Env-vars
 
 ```yml
-ALLOWED_DOMAINS: Allowed hosts (i.e. www.example.com)
+ALLOWED_DOMAINS: Allowed hosts (include “www.example.com” for health checks)
 CACHE_MAXSIZE: Maximum number of items in the cache, default is 100
 CACHE_TTL: Time to live for items in the cache, default is 60 seconds
 ```

@@ -27,7 +27,7 @@ async function init() {
 		chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
 		chromeLocation : '/usr/bin/chromium',
 		forwardHeaders : true,
-		pageLoadTimeout: 35 * 1000 // 35 secs
+		pageLoadTimeout: 45 * 1000 // 45 secs
 	})
 
 	// prerender plugins

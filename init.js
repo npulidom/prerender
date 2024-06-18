@@ -10,10 +10,10 @@ import prerenderCache from 'prerender-memory-cache'
 // * consts
 const VERSION = process.env.BUILD_ID
 
-const HEALTH_CHECK_URL = 'https://www.example.com/'
+const HEALTH_CHECK_URL = 'https://www.example.com'
 
 // * props
-let httpServer
+let httpServer, prerenderServer
 
 /**
  * Init
@@ -22,12 +22,14 @@ let httpServer
 async function init() {
 
 	// * prerender server (express)
-	const prerenderServer = prerender({
+	prerenderServer = prerender({
 
-		chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
-		chromeLocation : '/usr/bin/chromium',
-		forwardHeaders : true,
-		pageLoadTimeout: 45 * 1000 // 45 secs
+		chromeLocation   : '/usr/bin/chromium',
+		extraChromeFlags : ['--no-sandbox', '--disable-dev-shm-usage'], // defaults included: --headless, --disable-gpu, --hide-scrollbars
+		forwardHeaders   : true,
+		logRequests      : false,
+		captureConsoleLog: false,
+		pageLoadTimeout  : 35 * 1000,
 	})
 
 	// prerender plugins
@@ -75,24 +77,14 @@ async function init() {
 				url         : `http://localhost:3000/render?userAgent=PrerenderCrawler&followRedirects=true&url=${href}`,
 				method      : 'GET',
 				responseType: 'stream',
+				timeout     : 45 * 1000,
 			})
 
 			// on-error
 			stream.on('error', async e => {
 
 				console.warn(`Init (prerender/on-error) -> stream error: ${e.toString()}`)
-
-				try {
-
-					// check browser health, restart browser?
-					const { status } = await axios(`http://localhost:3000/render?url=${HEALTH_CHECK_URL}`)
-					console.log(`Init (prerender/on-error) -> browser is healthy, no need to restart [${status}]`)
-				}
-				catch (e) {
-
-					console.log(`Init (prerender/on-error) -> browser is not healthy, restarting browser ...`)
-					prerenderServer.restartBrowser()
-				}
+				await checkPrerenderServer()
 
 				res.status(429).send()
 			})
@@ -111,6 +103,8 @@ async function init() {
 		catch (e) {
 
 			console.error(`Init (prerender) -> exception: ${e.toString()}`)
+			await checkPrerenderServer()
+
 			res.status(500).send(e.toString())
 		}
 	})
@@ -122,6 +116,34 @@ async function init() {
 	await prerenderServer.start()
 
 	console.log(`Init -> servers up at ${new Date().toString()}, version: ${VERSION}`)
+}
+
+/**
+ * Check Prerender Server
+ */
+async function checkPrerenderServer() {
+
+	try {
+
+		// check browser health, restart browser?
+		const { status } = await axios({
+
+			url    : `http://localhost:3000/render?userAgent=HealthCheckCrawler&url=${HEALTH_CHECK_URL}`,
+			method : 'GET',
+			timeout: 45 * 1000,
+		})
+
+		console.log(`Init (checkPrerenderServer) -> browser is healthy, no need to restart [${status}]`)
+	}
+	catch (e) {
+
+		if (!prerenderServer) return
+
+		console.log(`Init (checkPrerenderServer) -> browser is not healthy, restarting browser ...`)
+
+		await prerenderServer.killBrowser()
+		await prerenderServer.start()
+	}
 }
 
 /**

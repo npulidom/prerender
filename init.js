@@ -24,12 +24,23 @@ async function init() {
 	// * prerender server (express)
 	prerenderServer = prerender({
 
-		chromeLocation   : '/usr/bin/chromium',
-		extraChromeFlags : ['--no-sandbox', '--disable-dev-shm-usage'], // defaults included: --headless, --disable-gpu, --hide-scrollbars
-		forwardHeaders   : true,
-		logRequests      : false,
+		chromeLocation: '/usr/bin/chromium',
+		extraChromeFlags: [
+
+			//'--headless',
+			//'--hide-scrollbars',
+			//'--disable-gpu',
+			'--no-sandbox',
+			'--no-zygote',
+			'--no-first-run',
+			'--disable-setuid-sandbox',
+			'--disable-dev-shm-usage',
+			'--disable-web-security',
+			'--ignore-certificate-errors',
+		],
+		forwardHeaders: true,
+		logRequests: false,
 		captureConsoleLog: false,
-		pageLoadTimeout  : 35 * 1000,
 	})
 
 	// prerender plugins
@@ -81,12 +92,10 @@ async function init() {
 			})
 
 			// on-error
-			stream.on('error', async e => {
+			stream.on('error', e => {
 
 				console.warn(`Init (prerender/on-error) -> stream error: ${e.toString()}`)
-				await checkPrerenderServer()
-
-				res.status(429).send()
+				throw 'STREAM_ERROR'
 			})
 
 			// on-data
@@ -141,6 +150,7 @@ async function checkPrerenderServer() {
 
 		console.log(`Init (checkPrerenderServer) -> browser is not healthy, restarting browser ...`)
 
+		// * restart
 		await prerenderServer.killBrowser()
 		await prerenderServer.start()
 	}

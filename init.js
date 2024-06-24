@@ -25,11 +25,11 @@ async function init() {
 	prerenderServer = prerender({
 
 		chromeLocation: '/usr/bin/chromium',
-		extraChromeFlags: [
+		chromeFlags: [
 
-			//'--headless',
-			//'--hide-scrollbars',
-			//'--disable-gpu',
+			'--headless',
+			'--hide-scrollbars',
+			'--disable-gpu',
 			'--no-sandbox',
 			'--no-zygote',
 			'--no-first-run',
@@ -37,6 +37,7 @@ async function init() {
 			'--disable-dev-shm-usage',
 			'--disable-web-security',
 			'--ignore-certificate-errors',
+			'--remote-debugging-port=9222',
 		],
 		forwardHeaders: true,
 		logRequests: false,

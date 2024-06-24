@@ -114,7 +114,7 @@ async function init() {
 			console.error(`Init (prerender) -> exception: ${e.toString()}`)
 			await checkPrerenderServer()
 
-			res.status(500).send(e.toString())
+			res.status(503).send()
 		}
 	})
 

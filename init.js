@@ -2,16 +2,18 @@
  * Init
  */
 
+import axios          from 'axios'
 import express        from 'express'
 import prerender      from 'prerender'
 import prerenderCache from 'prerender-memory-cache'
-import got            from 'got'
 
 // * consts
 const VERSION = process.env.BUILD_ID
 
+const HEALTH_CHECK_URL = 'https://www.example.com'
+
 // * props
-let httpServer
+let httpServer, prerenderServer
 
 /**
  * Init
@@ -20,12 +22,27 @@ let httpServer
 async function init() {
 
 	// * prerender server (express)
-	const prerenderServer = prerender({
+	prerenderServer = prerender({
 
-		chromeFlags    : ['--no-sandbox', '--headless', '--disable-gpu', '--hide-scrollbars', '--disable-dev-shm-usage', '--remote-debugging-port=9222'],
-		chromeLocation : '/usr/bin/chromium-browser',
-		forwardHeaders : true,
-		pageLoadTimeout: 35 * 1000 // 35 secs
+		chromeLocation: '/usr/bin/chromium-browser',
+		chromeFlags: [
+
+			'--headless',
+			'--hide-scrollbars',
+			'--disable-gpu',
+			'--no-sandbox',
+			'--no-zygote',
+			'--no-first-run',
+			'--disable-setuid-sandbox',
+			'--disable-dev-shm-usage',
+			'--disable-web-security',
+			'--ignore-certificate-errors',
+			'--remote-debugging-port=9222',
+		],
+		pageLoadTimeout: parseInt(process.env.PAGE_LOAD_TIMEOUT) || undefined,
+		forwardHeaders: true,
+		logRequests: false,
+		captureConsoleLog: false,
 	})
 
 	// prerender plugins
@@ -51,14 +68,14 @@ async function init() {
 	/**
 	 * GET - Root
 	 */
-	app.get('*/', (req, res) => {
+	app.get('*/', async (req, res) => {
 
 		try {
 
-			if (!req.query.url) throw 'missing "url" query param'
+			if (!req.query.url) throw 'missing “url” query param'
 
 			const { href, pathname } = new URL(req.query.url.trim())
-			if (!href) throw 'invalid "url" query param'
+			if (!href) throw 'invalid “url” query param'
 
 			// check URL path for any extension (only HTML files supported)
 			const extension = pathname.match(/.*\.[^.]+$/)
@@ -68,27 +85,23 @@ async function init() {
 			if (process.env.NODE_ENV === 'development') console.time(`prerender:${href}`)
 
 			// get output
-			const stream = got.stream(`http://localhost:3000/render?userAgent=PrerenderCrawler&url=${href}`)
+			const { data: stream } = await axios({
+
+				url         : `http://localhost:3000/render?userAgent=PrerenderCrawler&followRedirects=true&url=${href}`,
+				method      : 'GET',
+				responseType: 'stream',
+				timeout     : 45 * 1000,
+			})
 
 			// on-error
-			stream.on('error', async e => {
+			stream.on('error', e => {
 
 				console.warn(`Init (prerender/on-error) -> stream error: ${e.toString()}`)
-
-				// restart browser? check browser health
-				const { statusCode } = await got('http://localhost:3000/render?url=https://www.google.com')
-
-				if (statusCode === 200)
-					console.log(`Init (prerender/on-error) -> browser is healthy, no need to restart`)
-				else
-					prerenderServer.restartBrowser()
-
-				res.status(400).send()
+				throw 'STREAM_ERROR'
 			})
 
 			// on-data
 			stream.on('data', data => res.write(data))
-
 			// on-end
 			stream.on('end', () => {
 
@@ -101,7 +114,9 @@ async function init() {
 		catch (e) {
 
 			console.error(`Init (prerender) -> exception: ${e.toString()}`)
-			res.status(500).send(e.toString())
+			await checkPrerenderServer()
+
+			res.status(503).send()
 		}
 	})
 
@@ -112,6 +127,35 @@ async function init() {
 	await prerenderServer.start()
 
 	console.log(`Init -> servers up at ${new Date().toString()}, version: ${VERSION}`)
+}
+
+/**
+ * Check Prerender Server
+ */
+async function checkPrerenderServer() {
+
+	try {
+
+		// check browser health, restart browser?
+		const { status } = await axios({
+
+			url    : `http://localhost:3000/render?userAgent=HealthCheckCrawler&url=${HEALTH_CHECK_URL}`,
+			method : 'GET',
+			timeout: 45 * 1000,
+		})
+
+		console.log(`Init (checkPrerenderServer) -> browser is healthy, no need to restart [${status}]`)
+	}
+	catch (e) {
+
+		if (!prerenderServer) return
+
+		console.log(`Init (checkPrerenderServer) -> browser is not healthy, restarting browser ...`)
+
+		// * restart
+		await prerenderServer.killBrowser()
+		await prerenderServer.start()
+	}
 }
 
 /**

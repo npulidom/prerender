@@ -10,7 +10,7 @@ import prerenderCache from 'prerender-memory-cache'
 // * consts
 const VERSION = process.env.BUILD_ID
 
-const HEALTH_CHECK_URL = 'https://www.example.com'
+const HEALTH_CHECK_URL = process.env.HEALTH_CHECK_URL || 'https://www.example.com'
 
 // * props
 let httpServer, prerenderServer

@@ -5,6 +5,9 @@ Container service that uses Headless Chrome to render SPA's as HTML ([Dynamic Re
 ## Usage
 
 ```bash
+# pull
+docker pull npulidom/prerender
+# run
 docker run -p 8080:80 npulidom/prerender
 # test
 curl -i http://localhost:8080/?url=https://www.example.com

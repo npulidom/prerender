@@ -1,5 +1,6 @@
 {
 	"name": "g-prerender",
+	"version": "1.0.0",
 	"license": "UNLICENSED",
 	"type": "module",
 	"scripts": {

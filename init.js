@@ -7,13 +7,29 @@ import express        from 'express'
 import prerender      from 'prerender'
 import prerenderCache from 'prerender-memory-cache'
 
-// * consts
+/**
+ * Version
+ * @constant {string} VERSION - The build version
+ */
 const VERSION = process.env.BUILD_ID
 
+/**
+ * Health Check URL
+ * @constant {string} HEALTH_CHECK_URL - The health check URL for service monitoring
+ */
 const HEALTH_CHECK_URL = process.env.HEALTH_CHECK_URL || 'https://www.example.com'
 
-// * props
-let httpServer, prerenderServer
+/**
+ * Server
+ * @property {object} server - The server instance
+ */
+let httpServer
+
+/**
+ * Prerender Server
+ * @property {object} prerenderServer - The prerender server instance
+ */
+let prerenderServer
 
 /**
  * Init
@@ -61,12 +77,12 @@ async function init() {
 	app.disable('x-powered-by')
 
 	/**
-	 * Health Check
+	 * Health Check Route
 	 */
 	app.get('*/health', (req, res) => res.sendStatus(200))
 
 	/**
-	 * GET - Root
+	 * GET - Root Route
 	 */
 	app.get('*/', async (req, res) => {
 
@@ -131,6 +147,7 @@ async function init() {
 
 /**
  * Check Prerender Server
+ * @returns {undefined}
  */
 async function checkPrerenderServer() {
 

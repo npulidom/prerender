@@ -88,10 +88,10 @@ async function init() {
 
 		try {
 
-			if (!req.query.url) throw 'missing “url” query param'
+			if (!req.query.url) throw 'MISSING_QUERY_PARAM_URL'
 
 			const { href, pathname } = new URL(req.query.url.trim())
-			if (!href) throw 'invalid “url” query param'
+			if (!href) throw 'INVALID_QUERY_PARAM_URL'
 
 			// check URL path for any extension (only HTML files supported)
 			const extension = pathname.match(/.*\.[^.]+$/)
@@ -142,7 +142,7 @@ async function init() {
 	// * start prerender server
 	await prerenderServer.start()
 
-	console.log(`Init -> servers up at ${new Date().toString()}, version: ${VERSION}`)
+	console.log(`Init -> servers up at ${new Date().toString()}, version=${VERSION}`)
 }
 
 /**

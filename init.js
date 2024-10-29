@@ -55,7 +55,7 @@ async function init() {
 			'--ignore-certificate-errors',
 			'--remote-debugging-port=9222',
 		],
-		pageLoadTimeout: parseInt(process.env.PAGE_LOAD_TIMEOUT) || undefined,
+		pageLoadTimeout: Number.parseInt(process.env.PAGE_LOAD_TIMEOUT) || undefined,
 		forwardHeaders: true,
 		logRequests: false,
 		captureConsoleLog: false,

@@ -2,6 +2,7 @@
 
 Container service that uses Headless Chrome to render SPA's as HTML ([Dynamic Rendering](https://developers.google.com/search/docs/guides/dynamic-rendering)), built on NodeJs.
 
+[Github Repository](https://github.com/npulidom/prerender)
 [Docker hub image](https://hub.docker.com/r/npulidom/prerender)
 
 ## Usage
